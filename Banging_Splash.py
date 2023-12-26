@@ -5,9 +5,11 @@ import math
 
 pygame.init()
 
+mixer.init()
+
 screen = pygame.display.set_mode((800, 600))
 # screen.fill((150, 150, 150))
-pygame.display.set_caption('Invaders Game')
+pygame.display.set_caption('ex05/Invaders Game')
 
 # Player
 playerImg = pygame.image.load('ex05/player.png')
@@ -34,6 +36,16 @@ shield_state = 'ready'
 
 # Score
 score_value = 0
+#クリア条件
+font_1 = pygame.font.SysFont(None, 32) # フォントの作成
+clear_font = pygame.font.SysFont(None, 64) # **ゲームクリアメッセージ用のフォントを作成**
+
+def sound_beam():
+    pygame.mixer.init() #初期化
+    pygame.mixer.music.load("laser.wav") #読み込み
+    pygame.mixer.music.play(1) #再生
+
+    
 
 def player(x, y):
     screen.blit(playerImg, (x, y))
@@ -56,6 +68,25 @@ def isCollision(obj1X, obj1Y, obj2X, obj2Y, obj1_radius, obj2_radius):
         return True
     else:
         return False
+    
+# gaugeの値設定
+gauge_value = 0
+gauge_max = 5
+font_gauge = pygame.font.Font(None, 40)
+font_gauge_power = pygame.font.Font(None, 30)
+
+"""
+gaugeの描画設定
+ゲージの増加を表すゲージを緑に設定
+ゲージが満たされていない事を表す色を赤に設定
+スコアの下あたり表示させる
+"""
+
+def gauge():
+    pygame.draw.rect(screen, (255, 0, 0), [20, 80, gauge_max * 20, 20])  #　赤のゲージ
+    pygame.draw.rect(screen, (0, 255, 0), [20, 80, gauge_value * 20, 20])  # 緑のゲージ
+    text_gauge_power = font_gauge_power.render("POWER"+str(gauge_value), True, (0,255,0))   # 描画する文字列の設定
+    screen.blit(text_gauge_power, [20, 130])# 文字列の表示位置
 
 running = True
 while running:
@@ -74,15 +105,11 @@ while running:
                 if bullet_state is 'ready':
                     bulletX = playerX
                     fire_bullet(bulletX, bulletY)
-            #ここ        
-            if event.key == pygame.K_s:  # Press 'S' to activate shield
-                if shield_state == 'ready':
-                    shieldX, shieldY = playerX, playerY
-                    shield_state = 'active'
-                    
+
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 playerX_change = 0
+
     # Player
     playerX += playerX_change
     if playerX <= 0:
@@ -101,17 +128,25 @@ while running:
         break
     enemyX += enemyX_change
     if enemyX <= 0: #左端に来たら
-        enemyX_change = 1#4 
+        enemyX_change = 4
         enemyY += enemyY_change
     elif enemyX >=736: #右端に来たら
-        enemyX_change = -1#-4
+        enemyX_change = -4
         enemyY += enemyY_change
 
-    #ここ
-    if shield_state == 'active' and isCollision(enemyX, enemyY, playerX, playerY, shield_radius, 32):
-        shield_state = 'ready'
+    collision = isCollision(enemyX, enemyY, bulletX, bulletY)
+    if collision:
+        bulletY = 480
+        bullet_state = 'ready'
+        score_value += 1
         enemyX = random.randint(0, 736)
         enemyY = random.randint(50, 150)
+
+    #ゲージの最大値を文字として表示
+    if gauge_max == 15:
+            text_gauge = font_gauge.render("GAUGE MAX", True, (255,0,0))   # 描画する文字列の設定
+            screen.blit(text_gauge, [20, 150])# 文字列の表示位置
+           
 
     # Bullet Movement
     if bulletY <=0:
@@ -127,7 +162,38 @@ while running:
     score = font.render(f"Score : {str(score_value)}", True, (255,255,255)) # テキストを描画したSurfaceの作成
     screen.blit(score, (20,50))
 
+    # ゲームクリア
+    """
+    if score_value >= 3:
+        clear_text = clear_font.render("congratulations!", True, (255,255,255)) # **クリアメッセージを作成**
+        screen.blit(clear_text, (200,250)) # 画面中央に表示
+        pygame.display.update()
+        pygame.time.wait(5000) # 5秒間待つ
+        break
+"""
+    # ゲームクリア
+    if score_value >= 3:
+        clear_text_1 = clear_font.render("congratulations...", True, (255,255,0)) # クリアメッセージを作成
+
+        text_height = clear_text_1.get_height()
+        start_y = 600  # テキストが画面下から始まるように設定
+        speed = 8  # テキストが移動する速度
+
+        while start_y + text_height > 0:  # テキストが画面上に完全に消えるまでループ
+            screen.fill((0, 0, 0))  # 画面を黒で塗りつぶす
+            screen.blit(clear_text_1, (200, start_y))  # テキストを新しい位置に描画
+            pygame.display.update()  # 画面を更新
+            start_y -= speed  # テキストのy座標を減らす（上に移動）
+            pygame.time.wait(20)  # 一定時間待つ（テキストの移動速度を制御）
+
+        
+        break
+
+    # guageの描画
+    gauge()
+
     player(playerX, playerY)
     enemy(enemyX, enemyY)
+
 
     pygame.display.update()  
