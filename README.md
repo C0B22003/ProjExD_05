@@ -1,5 +1,3 @@
-
-# Banging_Splash
 # Banging Splash
 
 # ゲーム のタイトル
