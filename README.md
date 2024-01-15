@@ -21,7 +21,7 @@
 ## ゲームの実装
 ###共通基本機能
 * YouTubeより拝借したインベーダーゲームコードを基にしている。  
-https://www.youtube.com/watch?v=fAJ_BjLd3Ro
+→　https://www.youtube.com/watch?v=fAJ_BjLd3Ro
 
 ## 操作方法
 **左矢印キー**: プレイヤーを左に移動  
