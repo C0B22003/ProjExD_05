@@ -1,5 +1,5 @@
 # ゲーム のタイトル
-## Banging Splash
+**Banging Splash**
 
 ## 実行環境の必要条件
 * python >= 3.10
